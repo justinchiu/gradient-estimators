@@ -1,0 +1,43 @@
+\begin{thebibliography}{6}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Grathwohl et~al.(2017)Grathwohl, Choi, Wu, Roeder, and
+  Duvenaud]{grathwohl2017relax}
+Will Grathwohl, Dami Choi, Yuhuai Wu, Geoffrey Roeder, and David Duvenaud.
+\newblock Backpropagation through the void: Optimizing control variates for
+  black-box gradient estimation.
+\newblock \emph{CoRR}, abs/1711.00123, 2017.
+\newblock URL \url{http://arxiv.org/abs/1711.00123}.
+
+\bibitem[Maddison(2016)]{maddison2016poissonprocess}
+Chris~J. Maddison.
+\newblock A poisson process model for monte carlo.
+\newblock \emph{ArXiv}, abs/1602.05986, 2016.
+
+\bibitem[Mohamed et~al.(2019)Mohamed, Rosca, Figurnov, and
+  Mnih]{shakir2019mcgrad}
+Shakir Mohamed, Mihaela Rosca, Michael Figurnov, and Andriy Mnih.
+\newblock Monte carlo gradient estimation in machine learning.
+\newblock \emph{ArXiv}, abs/1906.10652, 2019.
+
+\bibitem[Owen(2013)]{mcbook}
+Art~B. Owen.
+\newblock \emph{Monte Carlo theory, methods and examples}.
+\newblock 2013.
+
+\bibitem[Paulus et~al.(2020)Paulus, Choi, Tarlow, Krause, and
+  Maddison]{paulus2020sst}
+Max~B. Paulus, Dami Choi, Daniel Tarlow, Andreas Krause, and Chris~J. Maddison.
+\newblock Gradient estimation with stochastic softmax tricks.
+\newblock \emph{ArXiv}, abs/2006.08063, 2020.
+
+\bibitem[Xu et~al.(2018)Xu, Quiroz, Kohn, and Sisson]{xu2018varrp}
+Ming Xu, Matias Quiroz, Robert Kohn, and Scott~Anthony Sisson.
+\newblock Variance reduction properties of the reparameterization trick.
+\newblock In \emph{AISTATS}, 2018.
+
+\end{thebibliography}
