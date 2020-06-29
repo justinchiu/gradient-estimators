@@ -1,12 +1,12 @@
 # Fdb version 3
-["bibtex main"] 1593455118 "main.aux" "main.bbl" "main" 1593455194
+["bibtex main"] 1593455873 "main.aux" "main.bbl" "main" 1593455873
   "/usr/local/texlive/2018/texmf-dist/bibtex/bst/natbib/plainnat.bst" 1480098435 26816 ffe5423d2019860bad9f54bc402fac15 ""
   "bib.bib" 1593187383 1689 2a1654719cd2afb704d78b694e9229df ""
-  "main.aux" 1593455194 2212 3833a7758424c1d9147864c3352a2290 ""
+  "main.aux" 1593455873 2212 49e39a0eb673bee7b8d2e887e76e4d39 ""
   (generated)
   "main.blg"
   "main.bbl"
-["pdflatex"] 1593455194 "main.tex" "main.pdf" "main" 1593455194
+["pdflatex"] 1593455873 "main.tex" "main.pdf" "main" 1593455873
   "/usr/local/texlive/2018/texmf-dist/fonts/map/fontname/texfonts.map" 1511824771 3332 103109f5612ad95229751940c61aada0 ""
   "/usr/local/texlive/2018/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmbsy5.tfm" 1480098698 1120 1e8878807317373affa7f7bba4cf2f6a ""
   "/usr/local/texlive/2018/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmbsy6.tfm" 1480098698 1124 14ccf5552bc7f77ca02a8a402bea8bfb ""
@@ -60,9 +60,11 @@
   "/usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb" 1480098733 31099 c85edf1dd5b9e826d67c9c7293b6786c ""
   "/usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb" 1480098734 34694 ad62b13721ee8eda1dcc8993c8bd7041 ""
   "/usr/local/texlive/2018/texmf-dist/tex/context/base/mkii/supp-pdf.mkii" 1480098806 71627 94eb9990bed73c364d7f53f960cc8c5b ""
+  "/usr/local/texlive/2018/texmf-dist/tex/generic/ifxetex/ifxetex.sty" 1480098815 1458 43ab4710dc82f3edeabecd0d099626b2 ""
   "/usr/local/texlive/2018/texmf-dist/tex/generic/oberdiek/etexcmds.sty" 1480098815 7612 729a8cc22a1ee0029997c7f74717ae05 ""
   "/usr/local/texlive/2018/texmf-dist/tex/generic/oberdiek/ifluatex.sty" 1480098815 7324 2310d1247db0114eb4726807c8837a0e ""
   "/usr/local/texlive/2018/texmf-dist/tex/generic/oberdiek/ifpdf.sty" 1490564930 1251 d170e11a3246c3392bc7f59595af42cb ""
+  "/usr/local/texlive/2018/texmf-dist/tex/generic/oberdiek/ifvtex.sty" 1480098815 6797 90b7f83b0ad46826bc16058b1e3d48df ""
   "/usr/local/texlive/2018/texmf-dist/tex/generic/oberdiek/infwarerr.sty" 1480098815 8253 473e0e41f9adadb1977e8631b8f72ea6 ""
   "/usr/local/texlive/2018/texmf-dist/tex/generic/oberdiek/kvdefinekeys.sty" 1480098815 5152 b67a3a964ad9851e095110c854a1d461 ""
   "/usr/local/texlive/2018/texmf-dist/tex/generic/oberdiek/kvsetkeys.sty" 1480098815 14040 ac8866aac45982ac84021584b0abb252 ""
@@ -170,6 +172,7 @@
   "/usr/local/texlive/2018/texmf-dist/tex/latex/doublestroke/dsfont.sty" 1480098826 230 7bc61880b468bfd38aedc173be7c3486 ""
   "/usr/local/texlive/2018/texmf-dist/tex/latex/environ/environ.sty" 1480098827 4378 f429f0da968c278653359293040a8f52 ""
   "/usr/local/texlive/2018/texmf-dist/tex/latex/fancyhdr/fancyhdr.sty" 1498861448 10663 d7fcc0dc4f35e8998b8cfeef8407d37d ""
+  "/usr/local/texlive/2018/texmf-dist/tex/latex/geometry/geometry.sty" 1525727744 41645 0653033a985e06c69a2a9cea9a95e31a ""
   "/usr/local/texlive/2018/texmf-dist/tex/latex/graphics-cfg/color.cfg" 1480098830 1213 620bba36b25224fa9b7e1ccb4ecb76fd ""
   "/usr/local/texlive/2018/texmf-dist/tex/latex/graphics-cfg/graphics.cfg" 1480098830 1224 978390e9c2234eab29404bc21b268d1e ""
   "/usr/local/texlive/2018/texmf-dist/tex/latex/graphics-def/pdftex.def" 1515537368 17334 520b9b85ad8a2a48eda3f643e27a5179 ""
@@ -206,11 +209,11 @@
   "/usr/local/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1526780433 2803735 8410db0ed74a2504fc3708922651cf03 ""
   "/usr/local/texlive/2018/texmf-var/web2c/pdftex/pdflatex.fmt" 1526780453 4219895 d646d013bf99294ff1d974bf7a525ca5 ""
   "/usr/local/texlive/2018/texmf.cnf" 1526780430 455 5b996dcaa0eb4ef14a83b026bc0a008c ""
-  "main.aux" 1593455194 2212 3833a7758424c1d9147864c3352a2290 ""
-  "main.bbl" 1593455118 1720 2f92043179bb5bc42c5e85fa922254ee "bibtex main"
-  "main.tex" 1593187487 890 e25639b21a66b17abc0cdcbd7d21aa91 ""
+  "main.aux" 1593455873 2212 49e39a0eb673bee7b8d2e887e76e4d39 ""
+  "main.bbl" 1593455873 1720 2f92043179bb5bc42c5e85fa922254ee "bibtex main"
+  "main.tex" 1593455867 933 e2b81f38003a7ccd29f5ddc4a3af51a8 ""
   "mystyle.sty" 1593271937 2697 14db567d48f4c17c1575ea9a121dd8cf ""
-  "papers/relax.tex" 1593455190 3271 835e32911661f8eac4a268780310dbbc ""
+  "papers/relax.tex" 1593455407 3271 f1c42ea6a9127fdc99d7d74d93d04cdb ""
   "papers/sst.tex" 1593120970 58 3967740f96815280bb0b21aaf39a316e ""
   "papers/varrp.tex" 1593226573 92 d09f0b42bfe89c216f8fa3f8c3977865 ""
   "sections/comparison.tex" 1593200190 48 382ccbc4bf4253e0718c15f9e278e49e ""
@@ -226,5 +229,5 @@
   "sections/variance/variance.tex" 1593121026 45 ce63a0e51dc3f1387fd4d464f9f1ebdf ""
   (generated)
   "main.pdf"
-  "main.log"
   "main.aux"
+  "main.log"
