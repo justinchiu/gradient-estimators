@@ -28,25 +28,45 @@ The score function estimator is
 \nabla_\theta \Es{b}{f(b)} = \Es{b}{f(b)\nabla_\theta \log p(b\mid\theta)}
 \end{equation}
 
-The LAX estimator is given by introducing differentiable surrogate $c_\phi(z)$
-with Gumbel-perturbed logits $z \sim p(z \mid \theta)$
+The DLAX estimator is given by introducing differentiable surrogate $c_\phi(z)$
+with Gumbel-perturbed logits $z = T(\theta, \epsilon), \epsilon\sim\Gumbel(0,1)$.
 \begin{equation}
-\nabla_\theta \Es{b}{f(b)} = \Es{z}{f(b)\nabla_\theta \log p(b\mid\theta)
-- c_\phi(z)\nabla_\theta \log p(z \mid \theta) + \nabla_\theta c_\phi(z)}
+\nabla_\theta \Es{b}{f(b)} = \Es{\epsilon}{f(b)\nabla_\theta \log p(b\mid\theta)
+- c_\phi(z)\nabla_\theta \log p(z \mid \theta)
++ \underbrace{\nabla_\theta c_\phi(z)}_\textrm{Reparam}}
 \end{equation}
-where $b = H(z), z\sim p(z\mid\theta)$ and $H$ is a deterministic transformation.
+where $b = H(z), z=T(\theta,\epsilon),\epsilon\sim \Gumbel(0,1)$ and $H$ is a deterministic transformation.
 For the case of $z\sim\Gumbel(\theta)$, $H(z) = \argmax_i(z_i)$.
 
-The RELAX estimator is obtained by 
+The RELAX estimator is obtained by further resampling $\tilde{z}\mid b$.
+With some rewriting, we obtain
+\begin{equation}
+\nabla_\theta \Es{b}{f(b)}
+= \Es{\epsilon}{(f(b) - \Es{\tilde{z}\mid b}{c_\phi(\tilde{z})})\nabla_\theta \log p(b\mid\theta)
+- \nabla_\theta\Es{\tilde{z}\mid b}{ c_\phi(\tilde{z})} + \nabla_\theta c_\phi(z)}
+\end{equation}
+See Appendix A for the derivation.
+The second to last term is of interest, as it entails resampling $\tilde{z} \mid b$.
+This term is also assumed to be reparameterizable.
+In total, the RELAX estimator requires one evaluation of $f$
+at $b$ and two evaluations of $c_\phi$ at $z,\tilde{z}$.
 
 \paragraph{Results}
 Show better training and validation performance on a mixture density model for MNIST
 Better training but overfits on omniglot
-Demonstrate faster convergence and lower variance gradient estimators than A2C for three RL tasks: cart-pole, lunar lander, and inverted pendulum
+Demonstrate faster convergence and lower variance gradient estimators than
+A2C for three RL tasks: cart-pole, lunar lander, and inverted pendulum
 
 \paragraph{Limitations}
-
-\paragraph{Future Directions}
+\begin{itemize}
+\item No empirical validation of variance reduction in DLAX to RELAX
+\item Likely requires combination with other variance reduction techniques when dealing with
+    large, unstructured distributions (unavoidable).
+\end{itemize}
 
 \paragraph{Questions / Comments}
+\begin{itemize}
+\item I would have liked to see experiments analyzing the effect of parameter sharing between
+$f$ and $c_\theta$ when possible.
+\end{itemize}
 
