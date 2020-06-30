@@ -1,5 +1,5 @@
 \section{RELAX}
-In this section we will review \citet{grathwohl2017relax}.
+In this section we review \citet{grathwohl2017relax}.
 
 \paragraph{Motivation}
 The aim of this paper is to find $\argmin\theta \Es{p(b \mid \theta)}{f(b)}$
@@ -50,6 +50,12 @@ The second to last term is of interest, as it entails resampling $\tilde{z} \mid
 This term is also assumed to be reparameterizable.
 In total, the RELAX estimator requires one evaluation of $f$
 at $b$ and two evaluations of $c_\phi$ at $z,\tilde{z}$.
+
+In summary:
+\begin{enumerate}
+\item Introduce differentiable surrogate $c_\phi$ as reparameterizable control variate 
+\item Condition on $b$ to increase correlation of control variate with estimand
+\end{enumerate}
 
 \paragraph{Results}
 Show better training and validation performance on a mixture density model for MNIST

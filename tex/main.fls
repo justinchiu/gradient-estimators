@@ -299,8 +299,10 @@ INPUT /usr/local/texlive/2018/texmf-dist/fonts/tfm/public/cm/cmr12.tfm
 INPUT /usr/local/texlive/2018/texmf-dist/fonts/tfm/public/cm/cmbx12.tfm
 INPUT sections/comparison.tex
 INPUT sections/comparison.tex
-INPUT sections/learning.tex
-INPUT sections/learning.tex
+INPUT sections/learning/learning.tex
+INPUT sections/learning/learning.tex
+INPUT sections/learning/biasvariance.tex
+INPUT sections/learning/biasvariance.tex
 INPUT sections/estimators/estimators.tex
 INPUT sections/estimators/estimators.tex
 INPUT sections/estimators/relaxations.tex

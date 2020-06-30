@@ -1,12 +1,12 @@
 # Fdb version 3
-["bibtex main"] 1593455873 "main.aux" "main.bbl" "main" 1593455873
+["bibtex main"] 1593532702 "main.aux" "main.bbl" "main" 1593532745
   "/usr/local/texlive/2018/texmf-dist/bibtex/bst/natbib/plainnat.bst" 1480098435 26816 ffe5423d2019860bad9f54bc402fac15 ""
   "bib.bib" 1593187383 1689 2a1654719cd2afb704d78b694e9229df ""
-  "main.aux" 1593455873 2212 49e39a0eb673bee7b8d2e887e76e4d39 ""
+  "main.aux" 1593532745 2296 39223cc4cd97c54e7dafa2dfedcf4503 ""
   (generated)
   "main.blg"
   "main.bbl"
-["pdflatex"] 1593455873 "main.tex" "main.pdf" "main" 1593455873
+["pdflatex"] 1593532745 "main.tex" "main.pdf" "main" 1593532745
   "/usr/local/texlive/2018/texmf-dist/fonts/map/fontname/texfonts.map" 1511824771 3332 103109f5612ad95229751940c61aada0 ""
   "/usr/local/texlive/2018/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmbsy5.tfm" 1480098698 1120 1e8878807317373affa7f7bba4cf2f6a ""
   "/usr/local/texlive/2018/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmbsy6.tfm" 1480098698 1124 14ccf5552bc7f77ca02a8a402bea8bfb ""
@@ -209,11 +209,11 @@
   "/usr/local/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1526780433 2803735 8410db0ed74a2504fc3708922651cf03 ""
   "/usr/local/texlive/2018/texmf-var/web2c/pdftex/pdflatex.fmt" 1526780453 4219895 d646d013bf99294ff1d974bf7a525ca5 ""
   "/usr/local/texlive/2018/texmf.cnf" 1526780430 455 5b996dcaa0eb4ef14a83b026bc0a008c ""
-  "main.aux" 1593455873 2212 49e39a0eb673bee7b8d2e887e76e4d39 ""
-  "main.bbl" 1593455873 1720 2f92043179bb5bc42c5e85fa922254ee "bibtex main"
-  "main.tex" 1593455867 933 e2b81f38003a7ccd29f5ddc4a3af51a8 ""
+  "main.aux" 1593532745 2296 39223cc4cd97c54e7dafa2dfedcf4503 ""
+  "main.bbl" 1593532702 1720 2f92043179bb5bc42c5e85fa922254ee "bibtex main"
+  "main.tex" 1593472904 985 5b899e112e07d00fd06236f41399b72a ""
   "mystyle.sty" 1593271937 2697 14db567d48f4c17c1575ea9a121dd8cf ""
-  "papers/relax.tex" 1593455407 3271 f1c42ea6a9127fdc99d7d74d93d04cdb ""
+  "papers/relax.tex" 1593532742 3481 4803817382aac824c3931ac2170de753 ""
   "papers/sst.tex" 1593120970 58 3967740f96815280bb0b21aaf39a316e ""
   "papers/varrp.tex" 1593226573 92 d09f0b42bfe89c216f8fa3f8c3977865 ""
   "sections/comparison.tex" 1593200190 48 382ccbc4bf4253e0718c15f9e278e49e ""
@@ -222,12 +222,13 @@
   "sections/estimators/scorefunction.tex" 1593187224 38 db6fe95243bdb4ec685cd7a1e10706de ""
   "sections/gumbelbasics.tex" 1593187448 59 b79a2f2ac1a7a42f85ef692ae0dd29b7 ""
   "sections/introduction.tex" 1593120400 96 4e2f23580a1c22cb4b4d98db8987737f ""
-  "sections/learning.tex" 1593037142 19 2013a0251db247d0f79dafa6cb7aefa5 ""
+  "sections/learning/biasvariance.tex" 1593463445 32 5f54c990af75fd1a828620f046181b18 ""
+  "sections/learning/learning.tex" 1593037142 19 2013a0251db247d0f79dafa6cb7aefa5 ""
   "sections/variance/antithetic.tex" 1593120536 33 230d540da2e63473ede4ebe9f9401b61 ""
   "sections/variance/conditioning.tex" 1593187256 26 02bafb4205439eb897dca1e70d528564 ""
   "sections/variance/controlvariates.tex" 1593187260 30 3ab8a036193936c8e3f460538a7d24f0 ""
   "sections/variance/variance.tex" 1593121026 45 ce63a0e51dc3f1387fd4d464f9f1ebdf ""
   (generated)
-  "main.pdf"
-  "main.aux"
   "main.log"
+  "main.aux"
+  "main.pdf"
