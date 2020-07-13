@@ -1,3 +1,16 @@
 \subsection{On the Bias and Variance of Gumbel-Softmax}
 
+We analyze the bias and variance of gradient estimators for models with
+discrete latent variables.
+In particular, we compare the mean squared error (MSE) of the exact gradient,
+score function estimator, and reparameterizable relaxation.
 
+\subsubsection{Problem Setup}
+We compare estimators for estimating gradients of the following expectation:
+\begin{equation}
+g(\theta) = \nabla_\theta \Es{p(z \mid\theta)}{f(z)}
+\end{equation}
+where $f(z)$ is the log-likehood of an observation $\log p(x \mid z)$
+and the dependence of $f$ on $x$ as well as the expecation wrt $x$ is omitted for brevity.
+
+\subsubsection{}
