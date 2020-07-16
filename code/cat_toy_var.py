@@ -1,4 +1,8 @@
 
+import matplotlib.pyplot as plt
+
+import numpy as onp
+
 import jax
 import jax.numpy as np
 from jax import grad, jit, vmap
@@ -24,7 +28,7 @@ def sample_gumbel(rng, shape, n=0):
 
 def sample_relaxed(logits, g0):
     g = logits + g0
-    return g - lse(g, -1, keepdims=True)
+    return np.exp(g - lse(g, -1, keepdims=True))
 
 def sample_hard(logits, g0):
     g = logits + g0
@@ -42,7 +46,7 @@ def f_relaxed(params, z, tau=1):
     emb, proj = params
     hid = z @ emb
     logits = hid @ proj / tau
-    return np.exp(logits - lse(logits, -1, keepdims=True))
+    return logits - lse(logits, -1, keepdims=True)
 
 def logp_x(theta, params, x):
     emb, proj = params
@@ -56,10 +60,6 @@ def logp_x(theta, params, x):
     #fz = logits[np.arange(Z)[None,None],x[:,:,None]]
     fz = logits[:,x].transpose((1, 2, 0))
     probs = np.exp(theta)
-
-    #print(fz.shape)
-    #print(probs.shape)
-    #print(probs.sum(-1))
 
     return (fz * probs).mean(0).sum()
 
@@ -79,14 +79,14 @@ def logp_x_z(theta, params, x, g):
     """
 
     # first order surrogate
-    return (fz * logp_z).mean(1).sum()
+    return (fz * logp_z).sum()
 
 def logp_x_z_relaxed(theta, params, x, g, tau=1):
     z = sample_relaxed(theta, g)
     Sz, Sx, N, Z = g.shape
     fz = f_relaxed(params, z, tau)
     fz = fz[:, np.arange(Sx)[:,None], np.arange(N), x]
-    return fz.mean(1).sum()
+    return fz.sum()
 
 # straight through?
 ###
@@ -103,8 +103,8 @@ n_trials = 2
 Z = 4
 X = 13
 sx = 128
-sx = 5
-sz = 64
+sx = 32
+sz = 16
 
 params = init_params(rng, Z, X)
 
@@ -135,17 +135,19 @@ d_logp_x_z = jit(grad(logp_x_z))
 d_logp_x_z_relaxed = jit(grad(logp_x_z_relaxed))
 
 d = d_logp_x(theta, params, xs)
-ds = d_logp_x_z(theta[None, None].repeat(sz, 0), params, xs, g)
-dr = d_logp_x_z_relaxed(theta[None, None].repeat(sz, 0), params, xs, g, 1.2)
+ds = d_logp_x_z(theta[None, None].repeat(sz, 0).repeat(sx, 1), params, xs, g)
+dp = d_logp_x_z_relaxed(theta[None, None].repeat(sz, 0).repeat(sx, 1), params, xs, g, 0.7)
 
 def sample_var(g):
+    g = g.mean(1)
     gc = g - g.mean(0)
-    return np.einsum("zxns,zxnt->znst", gc, gc)
+    return np.einsum("zns,znt->znst", gc, gc)
 
 def marg_var(S):
     return S.diagonal(axis1=1,axis2=2)
 
 print("Preliminary gradient check")
+# gradient: Sz x Sx x N x |theta|
 with printoptions(precision=5, suppress=True):
     print("True theta")
     print(np.exp(true_theta))
@@ -159,7 +161,7 @@ with printoptions(precision=5, suppress=True):
     print()
     print("SF gradient")
     print("Mean")
-    print(ds.mean(0)[0])
+    print(ds.mean(0).mean(0))
     Ss = sample_var(ds).sum(0) / (sz-1)
     print("Sample Cov")
     print(Ss)
@@ -169,20 +171,46 @@ with printoptions(precision=5, suppress=True):
     print()
     print("PW gradient")
     print("Mean")
-    print(dr.mean(0)[0])
-    Sr = sample_var(dr).sum(0) / (sz-1)
+    print(dp.mean(0).mean(0))
+    Sp = sample_var(dp).sum(0) / (sz-1)
     print("Sample Cov")
-    print(Sr)
+    print(Sp)
     print("Marg var")
-    print(marg_var(Sr))
+    print(marg_var(Sp))
 
 print("We see that the SF gradients have means comparable to the true gradient, as expected.")
-print("However the pathwise gradient estimators is really low magnitude.")
-print("Let's investigate why.")
+print("However the pathwise (PW) gradient estimators appears to be biased.")
+print("Let's investigate the how different the PW estimator is from the true gradient.")
 print()
-print("Hypothesis 1: The temperature needs to be carefully set.")
-print("To test this hypothesis, let's optimize the MSE of the PW estimator wrt temperature")
+print("Analysis 0: Mean-squared Error (MSE)")
+print("Using a naive temperature of 0 results in quite a large MSE.")
 
+def mse(g, g_true):
+    # g_true: N x theta
+    # g: Sz x Sx x N x theta
+    g_hat = g.mean(0).mean(0)
+    bias = g_true - g_hat
+    var = sample_var(g).sum(0) / (g.shape[0] - 1)
+    return np.einsum("ns,nt->nst", bias, bias) + var
 
+mse_s = mse(ds, d)
+mse_p = mse(dp, d)
+print(f"MSE of SF: {mse_s}")
+print(f"MSE of PW: {mse_p}")
+
+print("Let's check the MSE of the PW estimator as we vary the temperature.")
+for tau in onp.linspace(0, 2, 41):
+    dp = d_logp_x_z_relaxed(theta[None, None].repeat(sz, 0).repeat(sx, 1), params, xs, g, tau)
+    mse_p = mse(dp, d)
+    print(f"tr(MSE) of PW at tau={tau}:")
+    print(mse_p.trace(axis1=1,axis2=2))
+
+print("Compared to tr(MSE) of SF:")
+print(mse_s.trace(axis1=1, axis2=2))
+
+print("TODO")
+print("Let's optimize the MSE of the PW estimator wrt temperature")
+
+print("Analysis 1: ")
 
 import pdb; pdb.set_trace()
