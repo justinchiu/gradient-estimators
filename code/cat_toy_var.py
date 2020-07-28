@@ -7,7 +7,7 @@ import numpy as onp
 
 import jax
 import jax.numpy as np
-from jax import grad, jit, vmap
+from jax import value_and_grad, grad, jit, vmap
 from jax import random
 from jax import lax
 
@@ -247,28 +247,14 @@ def sample_relaxed_subset_old(logits, g0, K=1, tau=1):
 def sample_relaxed_subset(logits, g0, K=1, tau=1):
     Sz, Sx, N, Z = g0.shape
     g = logits + g0
-    # get bottom Z-K to set to -inf.
-    # TODO: check negative values are ok, otherwise can translate
-    # IS TOPK NOT DIFFERENTIABLE?
-    #g_masked, I = lax.top_k(g, K)
     g_masked, I = lax.top_k(g, K)
-    #import pdb; pdb.set_trace()
-    """
-    g_masked = g[
-        np.arange(Sz)[:,None,None,None],
-        np.arange(Sx)[:,None,None],
-        np.arange(N)[:,None],
-        I,
-    ]
-    import pdb; pdb.set_trace()
-    """
     # works without topk
     return np.exp(g_masked - lse(g_masked, -1, keepdims=True)), I
     # TODO: grad failure here? masking [x] and float -inf [x]
 
 jsample_relaxed_subset = jit(sample_relaxed_subset, static_argnums=(2,3))
 # Note: expansion done to prevent reduction of gradient in order to compute cov
-rzs, zs = sample_relaxed_subset(expanded_theta, g, 2, 0.7)
+rzs, zs = sample_relaxed_subset(expanded_theta, g, 4, 0.5)
 
 
 def log_cumsum_exp(x, dim=0):
@@ -307,49 +293,40 @@ def logp_subset(theta, zs):
     perms = all_perms(K)
     logp = logp_z[..., perms]
 
-
     # cumlogsumexp would be more stable? but there are only two elements here...
     # sum_i p(b_i)
-    a = logp.max(-1, keepdims=True)
-    p = np.exp(logp - a)
-    sbi = a + np.log(p.cumsum(-1) - p)
+    #a = logp.max(-1, keepdims=True)
+    #p = np.exp(logp - a)
+    #sbi0 = a + np.log(p.cumsum(-1) - p)
+
+    # slow implementation, the above seems wrong
+    sbis = [np.log(np.zeros(logp[..., 0].shape))]
+    for i in range(K-1):
+        sbis.append(np.logaddexp(sbis[-1], logp[..., i]))
+    sbi = np.stack(sbis, -1)
 
     logp_bs = logp.sum(-1) - log1mexp(sbi).sum(-1)
-    # TODO: grad failure here? cumsum [HERE]
     logp_b = lse(logp_bs, -1)
     return logp_b
 # /adaptation
 
-logp_zs = logp_subset(expanded_theta, zs)
-
 def logp_x_z_relaxed_subset(theta, params, x, g, K=1, tau=1):
-    rzs, zs = jsample_relaxed_subset(theta, g, K, tau)
+    rzs, zs = sample_relaxed_subset(theta, g, K, tau)
     Sz, Sx, N, Z = g.shape
     fz = f_relaxed_subset(params, rzs, zs)
-    #fz = f_relaxed(params, rzs)
     fxz = fz[:, np.arange(Sx)[:,None], np.arange(N), x]
+    #return fxz.sum()
     logp_b = logp_subset(theta, zs)
-    #return (lax.stop_gradient(fxz) * logp_b + fxz).sum()
-   
-    #rzso, zso = sample_relaxed_subset_old(theta, g, K, tau)
-    #fz_old = f_relaxed(params, rzso)
-    tz = sample_relaxed(theta, g, tau)
-    tfz = f_relaxed(params, tz)
-    tfxz = tfz[:, np.arange(Sx)[:,None], np.arange(N), x]
+    return (lax.stop_gradient(fxz) * logp_b + fxz).sum()
 
-    return (fxz).sum()
-    #return (tfxz).sum()
-    # check correctness of below
-    #return (np.exp(logp_b) * fz).sum()
+ok = logp_x_z_relaxed_subset(expanded_theta, params, xs, g, 4, 0.5)
 
-ok = logp_x_z_relaxed_subset(expanded_theta, params, xs, g, 2, 0.5)
+d_logp_x_z_relaxed_subset = jit(value_and_grad(logp_x_z_relaxed_subset), static_argnums=(4, 5))
 
-d_logp_x_z_relaxed_subset = jit(grad(logp_x_z_relaxed_subset), static_argnums=(4, 5))
-
-dps = d_logp_x_z_relaxed_subset(expanded_theta, params, xs, g, 2, 0.5)
-dps1 = d_logp_x_z_relaxed_subset(expanded_theta, params, xs, g, 1, 0.5)
-print(dps1)
-import pdb; pdb.set_trace()
+ps4, dps4 = d_logp_x_z_relaxed_subset(expanded_theta, params, xs, g, 4, 0.5)
+ps3, dps3 = d_logp_x_z_relaxed_subset(expanded_theta, params, xs, g, 3, 0.5)
+ps2, dps2 = d_logp_x_z_relaxed_subset(expanded_theta, params, xs, g, 2, 0.5)
+ps1, dps1 = d_logp_x_z_relaxed_subset(expanded_theta, params, xs, g, 1, 0.5)
 
 with printoptions(precision=3, suppress=True):
     st.write("True theta")
@@ -382,10 +359,40 @@ with printoptions(precision=3, suppress=True):
     st.write(marg_var(Sp))
 
     st.write()
-    st.write("SPW gradient")
+    st.write("SPW gradient 1")
     st.write("Mean")
-    st.write(dps.mean(0).mean(0))
-    Sp = sample_var(dps).sum(0) / (sz-1)
+    st.write(dps1.mean(0).mean(0))
+    Sp = sample_var(dps1).sum(0) / (sz-1)
+    st.write("Sample Cov")
+    st.write(Sp)
+    st.write("Marg var")
+    st.write(marg_var(Sp))
+
+    st.write()
+    st.write("SPW gradient 2")
+    st.write("Mean")
+    st.write(dps2.mean(0).mean(0))
+    Sp = sample_var(dps2).sum(0) / (sz-1)
+    st.write("Sample Cov")
+    st.write(Sp)
+    st.write("Marg var")
+    st.write(marg_var(Sp))
+
+    st.write()
+    st.write("SPW gradient 3")
+    st.write("Mean")
+    st.write(dps3.mean(0).mean(0))
+    Sp = sample_var(dps3).sum(0) / (sz-1)
+    st.write("Sample Cov")
+    st.write(Sp)
+    st.write("Marg var")
+    st.write(marg_var(Sp))
+
+    st.write()
+    st.write("SPW gradient 4")
+    st.write("Mean")
+    st.write(dps4.mean(0).mean(0))
+    Sp = sample_var(dps4).sum(0) / (sz-1)
     st.write("Sample Cov")
     st.write(Sp)
     st.write("Marg var")
