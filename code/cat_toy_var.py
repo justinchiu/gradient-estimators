@@ -25,6 +25,9 @@ seed = 1234
 
 rng = random.PRNGKey(seed)
 
+def normalize(x):
+    return x - lse(x, -1, keepdims=True)
+
 # omg, make this a monad, seriously.
 def sample_gumbel(rng, shape, n=0):
     rng, rng_input = random.split(rng)
@@ -33,7 +36,7 @@ def sample_gumbel(rng, shape, n=0):
 
 def sample_relaxed(logits, g0, tau=1):
     g = (logits + g0) / tau
-    return np.exp(g - lse(g, -1, keepdims=True))
+    return np.exp(normalize(g))
 
 def sample_hard(logits, g0):
     g = logits + g0
@@ -44,23 +47,25 @@ def f(params, z):
     emb, proj = params
     hid = emb[z]
     logits = hid.dot(proj)
-    return logits - lse(logits, -1, keepdims=True)
+    return normalize(logits)
 
 def f_relaxed(params, z):
     # z is coefficients
     emb, proj = params
     hid = z @ emb
     logits = hid @ proj
-    return logits - lse(logits, -1, keepdims=True)
+    return normalize(logits)
 
 def f_relaxed_subset(params, z, idxs):
     # z is coefficients
     emb, proj = params
     hid = np.einsum("abnz,abnzh->abnh", z, emb[idxs])
     logits = hid @ proj
-    return logits - lse(logits, -1, keepdims=True)
+    return normalize(logits)
 
 def logp_x(theta, params, x):
+    theta = normalize(theta)
+
     emb, proj = params
     S, N = x.shape
     Z, H = emb.shape
@@ -76,6 +81,7 @@ def logp_x(theta, params, x):
     return (fz * probs).mean(0).sum()
 
 def logp_x_z(theta, params, x, g):
+    theta = normalize(theta)
     z = sample_hard(theta, g)
     Sz, Sx, N, Z = g.shape
     fz = f(params, np.arange(Z))[z, x]
@@ -87,6 +93,7 @@ def logp_x_z(theta, params, x, g):
     return (fz * logp_z).sum()
 
 def logp_x_z_relaxed(theta, params, x, g, tau=1):
+    theta = normalize(theta)
     z = sample_relaxed(theta, g, tau)
     Sz, Sx, N, Z = g.shape
     fz = f_relaxed(params, z)
@@ -105,23 +112,21 @@ def init_params(rng, Z, X):
     return emb, proj
 
 n_trials = 2
-Z = 4
+Z = 8
 X = 13
 sx = 128
 sx = 32
-sz = 16
+sz = 2
 
 params = init_params(rng, Z, X)
 
 shape = (n_trials, Z)
 
 rng, rng_input = random.split(rng)
-true_theta = random.normal(rng_input, shape=shape)
-true_theta = true_theta - lse(true_theta, -1, keepdims=True)
+true_theta = normalize(random.normal(rng_input, shape=shape))
 
 rng, rng_input = random.split(rng)
-theta = random.normal(rng_input, shape=shape)
-theta = theta - lse(theta, -1, keepdims=True)
+theta = normalize(random.normal(rng_input, shape=shape))
 expanded_theta = theta[None, None].repeat(sz, 0).repeat(sx, 1)
 
 # get data
@@ -256,11 +261,6 @@ jsample_relaxed_subset = jit(sample_relaxed_subset, static_argnums=(2,3))
 # Note: expansion done to prevent reduction of gradient in order to compute cov
 rzs, zs = sample_relaxed_subset(expanded_theta, g, 4, 0.5)
 
-
-def log_cumsum_exp(x, dim=0):
-    pass
-
-
 # adapted from https://github.com/wouterkool/estimating-gradients-without-replacement/blob/master/bernoulli/gumbel.py
 def log1mexp(x):
     # Computes log(1-exp(-|x|))
@@ -273,7 +273,7 @@ def log1mexp(x):
 def all_perms(K):
     return np.array(list(permutations(range(K))))
 
-def logp_subset(theta, zs):
+def logp_unordered_subset(theta, zs):
     # last dimension of the zs indicates the selected elements
     # sparse index representation
     #
@@ -310,13 +310,39 @@ def logp_subset(theta, zs):
     return logp_b
 # /adaptation
 
+def logp_ordered_subset(theta, zs):
+    # last dimension of the zs indicates the selected elements
+    # sparse index representation
+    #
+    # Wouter et al use the Gumbel representation to compute p(Sk) in
+    # exponential time rather than factorial.
+    # We do it in factorial time.
+    Sz, Sx, N, K = zs.shape
+    # Is there a better syntax for gather
+    logp_z = theta[
+        np.arange(Sz)[:,None,None,None],
+        np.arange(Sx)[:,None,None],
+        np.arange(N)[:,None],
+        zs,
+    ]
+
+    sbis = [np.log(np.zeros(logp_z[..., 0].shape))]
+    for i in range(K-1):
+        sbis.append(np.logaddexp(sbis[-1], logp_z[..., i]))
+    sbi = np.stack(sbis, -1)
+
+    logp_b = logp_z.sum(-1) - log1mexp(sbi).sum(-1)
+    return logp_b
+# /adaptation
+
 def logp_x_z_relaxed_subset(theta, params, x, g, K=1, tau=1):
+    theta = normalize(theta)
     rzs, zs = sample_relaxed_subset(theta, g, K, tau)
     Sz, Sx, N, Z = g.shape
     fz = f_relaxed_subset(params, rzs, zs)
     fxz = fz[:, np.arange(Sx)[:,None], np.arange(N), x]
-    #return fxz.sum()
-    logp_b = logp_subset(theta, zs)
+    logp_b = logp_unordered_subset(theta, zs)
+    #logp_s = logp_ordered_subset(theta, zs)
     return (lax.stop_gradient(fxz) * logp_b + fxz).sum()
 
 ok = logp_x_z_relaxed_subset(expanded_theta, params, xs, g, 4, 0.5)
@@ -324,9 +350,12 @@ ok = logp_x_z_relaxed_subset(expanded_theta, params, xs, g, 4, 0.5)
 d_logp_x_z_relaxed_subset = jit(value_and_grad(logp_x_z_relaxed_subset), static_argnums=(4, 5))
 
 ps4, dps4 = d_logp_x_z_relaxed_subset(expanded_theta, params, xs, g, 4, 0.5)
+#import pdb; pdb.set_trace()
 ps3, dps3 = d_logp_x_z_relaxed_subset(expanded_theta, params, xs, g, 3, 0.5)
 ps2, dps2 = d_logp_x_z_relaxed_subset(expanded_theta, params, xs, g, 2, 0.5)
 ps1, dps1 = d_logp_x_z_relaxed_subset(expanded_theta, params, xs, g, 1, 0.5)
+
+ps, dps = d_logp_x_z_relaxed_subset(expanded_theta, params, xs, g, 4, 0.5)
 
 with printoptions(precision=3, suppress=True):
     st.write("True theta")
@@ -397,3 +426,18 @@ with printoptions(precision=3, suppress=True):
     st.write(Sp)
     st.write("Marg var")
     st.write(marg_var(Sp))
+
+st.write("MSE Analysis")
+mse_s = mse(ds, d)
+mse_p = mse(dp, d)
+mse_ps1 = mse(dps1, d)
+mse_ps2 = mse(dps2, d)
+mse_ps3 = mse(dps3, d)
+mse_ps4 = mse(dps4, d)
+with printoptions(precision=3, suppress=True):
+    st.write(f"tr(MSE) of SF: {mse_s.trace(axis1=1, axis2=2)}")
+    st.write(f"tr(MSE) of PW: {mse_p.trace(axis1=1, axis2=2)}")
+    st.write(f"tr(MSE) of SPW1: {mse_ps1.trace(axis1=1, axis2=2)}")
+    st.write(f"tr(MSE) of SPW2: {mse_ps2.trace(axis1=1, axis2=2)}")
+    st.write(f"tr(MSE) of SPW3: {mse_ps3.trace(axis1=1, axis2=2)}")
+    st.write(f"tr(MSE) of SPW4: {mse_ps4.trace(axis1=1, axis2=2)}")
