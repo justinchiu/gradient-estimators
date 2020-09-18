@@ -35,18 +35,17 @@ def init_params(rng, Z, X):
     return emb, proj
 
 n_trials = 2
-Z = 8
-X = 13
-sx = 128
+Z = 64
+X = 256
 sx = 32
-sz = 4
+sz = 16
 
 params = init_params(rng, Z, X)
 
 shape = (n_trials, Z)
 
 rng, rng_input = random.split(rng)
-true_theta = normalize(random.normal(rng_input, shape=shape))
+true_theta = normalize(random.normal(rng_input, shape=shape) * 3)
 
 rng, rng_input = random.split(rng)
 theta = normalize(random.normal(rng_input, shape=shape))
@@ -205,7 +204,7 @@ out = logp_x_z_relaxed_part(expanded_theta, params, xs, g, Z // 2, 0.5)
 
 d_logp_x_z_relaxed_part = jit(value_and_grad(logp_x_z_relaxed_part), static_argnums=(4, 5))
 
-parts = [1, 2, 4, 8]
+parts = [1, 4, 16, 32, 64 ]
 pss, dpss = zip(*[
     d_logp_x_z_relaxed_part(expanded_theta, params, xs, g, s, 0.5)
     for s in parts
@@ -224,6 +223,11 @@ with printoptions(precision=3, suppress=True):
         st.write(marg_var(Sp))
 
     for s, dps in enumerate(dpss):
+        st.write(f"SPPW{parts[s]}")
+        mean = dps.mean(0).mean(0)
+        st.write(f"sum(bias^2) = {((mean - d) ** 2).sum(-1)}")
+        Sp = sample_var(dps).sum(0) / (sz-1)
+        st.write(f"sum(var) = {marg_var(Sp).sum(-1)}")
         mse_ps = mse(dps, d)
-        st.write(f"tr(MSE) of SPPW{parts[s]}: {mse_ps.trace(axis1=1, axis2=2)}")
+        st.write(f"tr(MSE) = {mse_ps.trace(axis1=1, axis2=2)}")
 
